@@ -1,0 +1,24 @@
+image:
+  registry: YOUR_DOCKERHUB_USERNAME
+  tag: latest
+frontend:
+  replicas: 2
+  port: 80
+admin:
+  replicas: 1
+  port: 80
+backend:
+  replicas: 2
+  port: 5000
+mongodb:
+  image: mongo:7
+  storage: 2Gi
+ingress:
+  enabled: false
+  frontendHost: shopnow.local
+  adminHost: admin.shopnow.local
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  cpuUtilization: 70
