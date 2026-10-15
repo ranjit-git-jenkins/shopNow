@@ -1,0 +1,44 @@
+# Requires an installed ingress controller and DNS/hosts entry.
+# CORS note: backend/server.js currently allows localhost:3000/3001 only.
+# A same-origin reverse proxy is recommended before using this for browsers.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shopnow
+  namespace: shopnow
+spec:
+  rules:
+    - host: shopnow.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: shopnow-backend
+                port:
+                  number: 5000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: shopnow-frontend
+                port:
+                  number: 80
+    - host: admin.shopnow.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: shopnow-backend
+                port:
+                  number: 5000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: shopnow-admin
+                port:
+                  number: 80
