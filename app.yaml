@@ -1,0 +1,46 @@
+{{- range $name := list "backend" "frontend" "admin" }}
+{{- $cfg := index $.Values $name }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopnow-{{ $name }}
+spec:
+  replicas: {{ $cfg.replicas }}
+  selector:
+    matchLabels: { app: shopnow-{{ $name }} }
+  template:
+    metadata:
+      labels: { app: shopnow-{{ $name }} }
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: "{{ $.Values.image.registry }}/shopnow-{{ $name }}:{{ $.Values.image.tag }}"
+          ports:
+            - containerPort: {{ $cfg.port }}
+          {{- if eq $name "backend" }}
+          env:
+            - name: PORT
+              value: "5000"
+            - name: MONGODB_URI
+              value: "mongodb://mongodb:27017/shopnow"
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ if eq $name "backend" }}/api/health{{ else }}/{{ end }}
+              port: {{ $cfg.port }}
+            initialDelaySeconds: 5
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopnow-{{ $name }}
+spec:
+  selector: { app: shopnow-{{ $name }} }
+  ports:
+    - port: {{ $cfg.port }}
+      targetPort: {{ $cfg.port }}
+---
+{{- end }}

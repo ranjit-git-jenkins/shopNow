@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopnow-admin
+  namespace: shopnow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shopnow-admin
+  template:
+    metadata:
+      labels:
+        app: shopnow-admin
+    spec:
+      containers:
+        - name: admin
+          image: YOUR_DOCKERHUB_USERNAME/shopnow-admin:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopnow-admin
+  namespace: shopnow
+spec:
+  type: ClusterIP
+  selector:
+    app: shopnow-admin
+  ports:
+    - port: 80
+      targetPort: 80
