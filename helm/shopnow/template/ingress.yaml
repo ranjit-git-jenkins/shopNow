@@ -1,0 +1,25 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shopnow
+spec:
+  rules:
+    {{- range $host := list .Values.ingress.frontendHost .Values.ingress.adminHost }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: shopnow-backend
+                port: { number: 5000 }
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ if eq $host $.Values.ingress.frontendHost }}shopnow-frontend{{ else }}shopnow-admin{{ end }}
+                port: { number: 80 }
+    {{- end }}
+{{- end }}
